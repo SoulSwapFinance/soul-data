@@ -1,0 +1,37 @@
+{
+	"name": "@soulswap/soul-data",
+	"license": "MIT",
+	"version": "1.0.0",
+	"author": "SoulSwap",
+	"main": "index",
+	"scripts": {
+		"lint": "eslint .",
+		"lint:fix": "eslint --fix",
+		"pack": "webpack --mode production",
+		"prepublish": "npm run pack"
+	},
+	"dependencies": {
+		"bluebird": "^3.7.2",
+		"commander": "^8.0.0",
+		"csv-stringify": "^5.6.2",
+		"date-fns": "^2.22.1",
+		"graph-results-pager": "^1.0.3",
+		"graphql": "^15.5.1",
+		"graphql-request": "^3.4.0",
+		"isomorphic-ws": "^4.0.1",
+		"node-fetch": "^2.6.1",
+		"subscriptions-transport-ws": "^0.9.19",
+		"ws": "^7.5.3"
+	},
+	"devDependencies": {
+		"eslint": "^7.31.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-import": "^2.23.4",
+		"eslint-plugin-prettier": "^3.4.0",
+		"prettier": "^2.3.2",
+		"ts-node": "^10.1.1",
+		"typescript": "^4.3.5",
+		"webpack": "^5.46.0",
+		"webpack-cli": "^4.7.2"
+	}
+}
