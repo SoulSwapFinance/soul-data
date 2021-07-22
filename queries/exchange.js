@@ -4,8 +4,8 @@ const factory = require('./exchange/factory');
 const eth = require('./exchange/eth');
 
 module.exports = {
-    ...token,
-    ...pair,
-    ...factory,
-    ...eth,
-}
+	...token,
+	...pair,
+	...factory,
+	...eth,
+};
