@@ -3,7 +3,7 @@ const { SubscriptionClient } = require('subscriptions-transport-ws');
 
 const { request, gql } = require('graphql-request');
 
-const { graphAPIEndpoints, graphWSEndpoints, circleAddress } = require('../constants');
+const { graphAPIEndpoints, graphWSEndpoints, spellAddress } = require('../constants');
 const { timestampToBlock } = require('../utils');
 
 module.exports = {
@@ -12,33 +12,33 @@ module.exports = {
 		block = block ? `block: { number: ${block} }` : '';
 
 		const result = await request(
-			graphAPIEndpoints.circle,
+			graphAPIEndpoints.spell,
 			gql`{
-                    circle(id: "${circleAddress}", ${block}) {
+                    spell(id: "${spellAddress}", ${block}) {
                         ${info.properties.toString()}
                     }
                 }`,
 		);
 
-		return info.callback(result.circle);
+		return info.callback(result.spell);
 	},
 
 	observeInfo() {
 		const query = gql`
             subscription {
-                circle(id: "${circleAddress}") {
+                spell(id: "${spellAddress}") {
                     ${info.properties.toString()}
                 }
         }`;
 
-		const client = new SubscriptionClient(graphWSEndpoints.circle, { reconnect: true }, ws);
+		const client = new SubscriptionClient(graphWSEndpoints.spell, { reconnect: true }, ws);
 		const observable = client.request({ query });
 
 		return {
 			subscribe({ next, error, complete }) {
 				return observable.subscribe({
 					next(results) {
-						next(info.callback(results.data.circle));
+						next(info.callback(results.data.spell));
 					},
 					error,
 					complete,
@@ -56,7 +56,7 @@ module.exports = {
 		block = block ? `block: { number: ${block} }` : '';
 
 		const result = await request(
-			graphAPIEndpoints.circle,
+			graphAPIEndpoints.spell,
 			gql`{
                     user(id: "${user_address.toLowerCase()}", ${block}) {
                         ${user.properties.toString()}
@@ -76,14 +76,14 @@ const info = {
 		'symbol',
 		'totalSupply',
 		'ratio',
-		'xSoulMinted',
-		'xSoulBurned',
+		'spellMinted',
+		'spellBurned',
 		'soulStaked',
 		'soulStakedUSD',
 		'soulHarvested',
 		'soulHarvestedUSD',
-		'xSoulAge',
-		'xSoulAgeDestroyed',
+		'spellAge',
+		'spellAgeDestroyed',
 		'updatedAt',
 	],
 
@@ -95,14 +95,14 @@ const info = {
 			symbol: results.symbol,
 			totalSupply: Number(results.totalSupply),
 			ratio: Number(results.ratio),
-			xSoulMinted: Number(results.xSoulMinted),
-			xSoulBurned: Number(results.xSoulBurned),
+			spellMinted: Number(results.spellMinted),
+			spellBurned: Number(results.spellBurned),
 			soulStaked: Number(results.totalSupply) * Number(results.ratio),
 			soulStakedUSD: Number(results.soulStakedUSD),
 			soulHarvested: Number(results.soulHarvested),
 			soulHarvestedUSD: Number(results.soulHarvestedUSD),
-			xSoulAge: Number(results.xSoulAge),
-			xSoulAgeDestroyed: Number(results.xSoulAgeDestroyed),
+			spellAge: Number(results.spellAge),
+			spellAgeDestroyed: Number(results.spellAgeDestroyed),
 			updatedAt: Number(results.updatedAt),
 		};
 	},
@@ -110,14 +110,14 @@ const info = {
 
 const user = {
 	properties: [
-		'xSoul',
-		'xSoulIn',
-		'xSoulOut',
-		'xSoulMinted',
-		'xSoulBurned',
-		'xSoulOffset',
-		'xSoulAge',
-		'xSoulAgeDestroyed',
+		'spell',
+		'spellIn',
+		'spellOut',
+		'spellMinted',
+		'spellBurned',
+		'spellOffset',
+		'spellAge',
+		'spellAgeDestroyed',
 		'soulStaked',
 		'soulStakedUSD',
 		'soulHarvested',
@@ -133,14 +133,14 @@ const user = {
 
 	callback(results) {
 		return {
-			xSoul: Number(results.xSoul),
-			xSoulIn: Number(results.xSoulIn),
-			xSoulOut: Number(results.xSoulOut),
-			xSoulMinted: Number(results.xSoulMinted),
-			xSoulBurned: Number(results.xSoulBurned),
-			xSoulOffset: Number(results.xSoulOffset),
-			xSoulAge: Number(results.xSoulAge),
-			xSoulAgeDestroyed: Number(results.xSoulAgeDestroyed),
+			spell: Number(results.spell),
+			spellIn: Number(results.spellIn),
+			spellOut: Number(results.spellOut),
+			spellMinted: Number(results.spellMinted),
+			spellBurned: Number(results.spellBurned),
+			spellOffset: Number(results.spellOffset),
+			spellAge: Number(results.spellAge),
+			spellAgeDestroyed: Number(results.spellAgeDestroyed),
 			soulStaked: Number(results.soulStaked),
 			soulStakedUSD: Number(results.soulStakedUSD),
 			soulHarvested: Number(results.soulHarvested),

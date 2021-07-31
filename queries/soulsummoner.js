@@ -3,8 +3,8 @@ const pageResults = require('graph-results-pager');
 
 const { request, gql } = require('graphql-request');
 
-const { graphAPIEndpoints, chefAddress, TWENTY_FOUR_HOURS } = require('./../constants');
-const { blockToTimestamp, timestampToBlock, getAverageBlockTime } = require('./../utils');
+const { graphAPIEndpoints, chefAddress, TWENTY_FOUR_HOURS } = require('../constants');
+const { blockToTimestamp, timestampToBlock, getAverageBlockTime } = require('../utils');
 const { BigInt } = require('is-bigint');
 const { pairs: exchangePairs } = require('./exchange');
 const { priceUSD: soulPriceUSD } = require('./soul');
@@ -15,15 +15,15 @@ module.exports = {
 		block = block ? `block: { number: ${block} }` : '';
 
 		const result = await request(
-			graphAPIEndpoints.masterchef,
+			graphAPIEndpoints.soulsummoner,
 			gql`{
-                    masterChef(id: "${chefAddress}", ${block}) {
+                    soulsummoner(id: "${chefAddress}", ${block}) {
                         ${info.properties.toString()}
                     }
                 }`,
 		);
 
-		return info.callback(result.masterChef);
+		return info.callback(result.soulsummoner);
 	},
 
 	async pool({ block = undefined, timestamp = undefined, pool_id = undefined, pool_address = undefined } = {}) {
@@ -37,7 +37,7 @@ module.exports = {
 		let result;
 		if (pool_id) {
 			result = await request(
-				graphAPIEndpoints.masterchef,
+				graphAPIEndpoints.soulsummoner,
 				gql`{
                         pool(id: ${pool_id}, ${block}) {
                             ${pools.properties.toString()}
@@ -46,7 +46,7 @@ module.exports = {
 			);
 		} else {
 			result = await request(
-				graphAPIEndpoints.masterchef,
+				graphAPIEndpoints.soulsummoner,
 				gql`{
                         pools(first: 1, where: {pair: "${pool_address.toLowerCase()}"}, ${block}) {
                             ${pools.properties.toString()}
@@ -60,7 +60,7 @@ module.exports = {
 
 	async pools({ block = undefined, timestamp = undefined } = {}) {
 		return pageResults({
-			api: graphAPIEndpoints.masterchef,
+			api: graphAPIEndpoints.soulsummoner,
 			query: {
 				entity: 'pools',
 				selection: {
@@ -99,7 +99,7 @@ module.exports = {
 		}
 
 		return pageResults({
-			api: graphAPIEndpoints.masterchef,
+			api: graphAPIEndpoints.soulsummoner,
 			query: {
 				entity: 'users',
 				selection: {
@@ -117,7 +117,7 @@ module.exports = {
 
 	async users({ block = undefined, timestamp = undefined } = {}) {
 		return pageResults({
-			api: graphAPIEndpoints.masterchef,
+			api: graphAPIEndpoints.soulsummoner,
 			query: {
 				entity: 'users',
 				selection: {
@@ -131,25 +131,25 @@ module.exports = {
 	},
 
 	async apys({ block = undefined, timestamp = undefined } = {}) {
-		const masterchefList = await module.exports.pools({ block, timestamp });
+		const soulsummonerList = await module.exports.pools({ block, timestamp });
 		const exchangeList = await exchangePairs({ block, timestamp });
 		const soulUSD = await soulPriceUSD({ block, timestamp });
 
-		const totalAllocPoint = masterchefList.reduce((a, b) => a + b.allocPoint, 0);
+		const totalAllocPoint = soulsummonerList.reduce((a, b) => a + b.allocPoint, 0);
 
 		const averageBlockTime = await getAverageBlockTime({ block, timestamp });
 
-		return masterchefList.map((masterchefPool) => {
-			const exchangePool = exchangeList.find((e) => e.id === masterchefPool.pair);
+		return soulsummonerList.map((soulsummonerPool) => {
+			const exchangePool = exchangeList.find((e) => e.id === soulsummonerPool.pair);
 			if (!exchangePool) {
-				return { ...masterchefPool, apy: 0 };
+				return { ...soulsummonerPool, apy: 0 };
 			}
 
-			const tvl = masterchefPool.slpBalance * (exchangePool.reserveUSD / exchangePool.totalSupply);
-			const soulPerBlock = (masterchefPool.allocPoint / totalAllocPoint) * 100;
+			const tvl = soulsummonerPool.slpBalance * (exchangePool.reserveUSD / exchangePool.totalSupply);
+			const soulPerBlock = (soulsummonerPool.allocPoint / totalAllocPoint) * 100;
 			const apy = ((soulUSD * (soulPerBlock * (60 / averageBlockTime) * 60 * 24 * 365)) / tvl) * 100;
 
-			return { ...masterchefPool, apy };
+			return { ...soulsummonerPool, apy };
 		});
 	},
 

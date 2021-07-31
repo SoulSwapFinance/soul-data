@@ -34,17 +34,17 @@ The below all return a Promise that resolves with the requested results.
 26. `exchange.twentyFourHourData({¹})` Gets 24h data for the SoulSwap factory.
 27. `exchange_v1.userHistory({², user_address})` Gets LP history for specified user.
 28. `exchange_v1.userPositions({¹, user_address})` Gets LP positions for specified user.
-29. `masterchef.info({¹})` Gets MasterChef contract info.
-30. `masterchef.pool({¹, pool_id, pool_address})` Gets pool info, either by pool id or by pool address.
-31. `masterchef.pools({¹})` Gets pool info for all pools in MasterChef.
-32. `masterchef.user({¹, user_address})` Gets user's data for all of the user's pools.
-33. `masterchef.users({¹})` Gets all users and data for all of the users' pools.
-34. `masterchef.apys({¹})` Gets pool info for all pools in MasterChef including APYs.
-35. `masterchef.apys24h({¹})` Gets 24h pool info for all pools in MasterChef including APYs.
-36. `exchange.stakedValue({¹, token_address})` Get pricing info for MasterChef pool.
-37. `circle.info({¹})` Gets SoulCircle contract info.
-38. `circle.user({¹, user_address})` Gets SoulCircle data for specified user.
-39. `maker.info({¹})` Gets SoulMaker contract info.
+29. `soulsummoner.info({¹})` Gets SoulSummoner contract info.
+30. `soulsummoner.pool({¹, pool_id, pool_address})` Gets pool info, either by pool id or by pool address.
+31. `soulsummoner.pools({¹})` Gets pool info for all pools in SoulSummoner.
+32. `soulsummoner.user({¹, user_address})` Gets user's data for all of the user's pools.
+33. `soulsummoner.users({¹})` Gets all users and data for all of the users' pools.
+34. `soulsummoner.apys({¹})` Gets pool info for all pools in SoulSummoner including APYs.
+35. `soulsummoner.apys24h({¹})` Gets 24h pool info for all pools in SoulSummoner including APYs.
+36. `exchange.stakedValue({¹, token_address})` Get pricing info for SoulSummoner pool.
+37. `seance.info({¹})` Gets SeanceCircle contract info.
+38. `seance.user({¹, user_address})` Gets SeanceCircle data for specified user.
+39. `makseanceer.info({¹})` Gets SoulMaker contract info.
 40. `maker.servings({²})` Gets past servings to the circle.
 41. `maker.servers({¹})` Gets servers that have served Soul to the circle.
 42. `maker.pendingServings({¹})` Gets data on the servings ready to be served to the circle.
@@ -53,7 +53,7 @@ The below all return a Promise that resolves with the requested results.
 45. `timelock.executedTxs({²})` Gets executed Timelock transactions.
 46. `timelock.allTxs({²})` Gets all Timelock transactions.
 47. `lockup.user({¹, user_address})` Gets lockup data for specified user.
-48. `bentobox.clones({masterAddress, chainId})` Gets Clone contracts for specified master contract.
+48. `funeralbox.clones({masterAddress, chainId})` Gets Clone contracts for specified master contract.
 
 ¹ `{block, timestamp}` Supports fetching at a specific block / UNIX timestamp.    
 ² `{minBlock, maxBlock, minTimestamp, maxTimestamp}` Supports fetching in a specific timeframe.
@@ -69,7 +69,7 @@ The below all return an Observable that when subscribed to with an object.
 6. `exchange.observePairs()` Gets an observable for the top 1000 pairs (by liquidity in USD).
 7. `exchange.observeEthPrice()` Gets an observable for the current USD price of ETH.
 8. `exchange.observeFactory()` Gets an observable for the SoulSwap factory.
-9. `circle.observeInfo()` Gets an observable for SoulCircle contract info.
+9. `seance.observeInfo()` Gets an observable for SeanceCircle contract info.
 10. `maker.observePendingServings()` Gets an observable for pending servings.
 
 ## Timeseries
@@ -84,7 +84,7 @@ const soulData = require('@soulswap/soul-data'); // common js
 import soulData from '@soulswap/soul-data'; // es modules
 
 // query and log resolved results
-soulData.masterchef
+soulData.soulsummoner
   .pools({block: 11223344})
   .then(pools => console.log(pools))
 
@@ -92,7 +92,7 @@ soulData.timelock
   .allTxs({minTimestamp: 1605239738, maxTimestamp: 1608239738})
   .then(txs => console.log(txs))
 
-soulData.circle
+soulData.seance
   .user({user_address: '0x6684977bbed67e101bb80fc07fccfba655c0a64f'})
   .then(user => console.log(user))
 

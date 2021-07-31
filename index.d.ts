@@ -2,8 +2,8 @@ import soul = require("./typings/soul");
 import blocks = require("./typings/blocks");
 import charts = require("./typings/charts");
 import exchange = require("./typings/exchange");
-import masterchef = require("./typings/masterchef");
-import circle = require("./typings/circle");
+import soulsummoner = require("./typings/soulsummoner");
+import seance = require("./typings/seance");
 import maker = require("./typings/maker");
 import timelock = require("./typings/timelock");
 import lockup = require("./typings/lockup");
@@ -20,5 +20,5 @@ declare namespace SoulData {
         target: Function;
     }, targetArguments?: any): Promise<any>;
 
-    export { soul, blocks, charts, exchange, exchange_v1, masterchef, circle, maker, timelock, lockup, utils, bentobox };
+    export { soul, blocks, charts, exchange, exchange_v1, soulsummoner, seance, maker, timelock, lockup, utils, funeralbox };
 }
