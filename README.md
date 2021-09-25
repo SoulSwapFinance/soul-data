@@ -42,12 +42,12 @@ The below all return a Promise that resolves with the requested results.
 34. `soulsummoner.apys({¹})` Gets pool info for all pools in SoulSummoner including APYs.
 35. `soulsummoner.apys24h({¹})` Gets 24h pool info for all pools in SoulSummoner including APYs.
 36. `exchange.stakedValue({¹, token_address})` Get pricing info for SoulSummoner pool.
-37. `seance.info({¹})` Gets SeanceCircle contract info.
-38. `seance.user({¹, user_address})` Gets SeanceCircle data for specified user.
-39. `makseanceer.info({¹})` Gets SoulMaker contract info.
-40. `maker.servings({²})` Gets past servings to the circle.
-41. `maker.servers({¹})` Gets servers that have served Soul to the circle.
-42. `maker.pendingServings({¹})` Gets data on the servings ready to be served to the circle.
+<!-- 37. `seance.info({¹})` Gets SeanceCircle contract info. -->
+<!-- 38. `seance.user({¹, user_address})` Gets SeanceCircle data for specified user. -->
+39. `reaper.info({¹})` Gets SoulReaper contract info.
+40. `reaper.servings({²})` Gets past servings to the circle.
+41. `reaper.servers({¹})` Gets servers that have served Soul to the circle.
+42. `reaper.pendingServings({¹})` Gets data on the servings ready to be served to the circle.
 43. `timelock.queuedTxs({²})` Gets queued Timelock transactions.
 44. `timelock.canceledTxs({²})` Gets canceled Timelock transactions.
 45. `timelock.executedTxs({²})` Gets executed Timelock transactions.
@@ -69,8 +69,8 @@ The below all return an Observable that when subscribed to with an object.
 6. `exchange.observePairs()` Gets an observable for the top 1000 pairs (by liquidity in USD).
 7. `exchange.observeEthPrice()` Gets an observable for the current USD price of ETH.
 8. `exchange.observeFactory()` Gets an observable for the SoulSwap factory.
-9. `seance.observeInfo()` Gets an observable for SeanceCircle contract info.
-10. `maker.observePendingServings()` Gets an observable for pending servings.
+<!-- 9. `seance.observeInfo()` Gets an observable for SeanceCircle contract info. -->
+10. `reaper.observePendingServings()` Gets an observable for pending servings.
 
 ## Timeseries
 
@@ -92,9 +92,9 @@ soulData.timelock
   .allTxs({minTimestamp: 1605239738, maxTimestamp: 1608239738})
   .then(txs => console.log(txs))
 
-soulData.seance
-  .user({user_address: '0x6684977bbed67e101bb80fc07fccfba655c0a64f'})
-  .then(user => console.log(user))
+// soulData.seance
+//   .user({user_address: '0x6684977bbed67e101bb80fc07fccfba655c0a64f'})
+//   .then(user => console.log(user))
 
 soulData.exchange
   .observePairs()

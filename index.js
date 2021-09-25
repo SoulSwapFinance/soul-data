@@ -9,8 +9,8 @@ const blocks = require('./queries/blocks');
 const charts = require('./queries/charts');
 const exchange = require('./queries/exchange');
 const soulsummoner = require('./queries/soulsummoner');
-const seance = require('./queries/seance');
-const maker = require('./queries/maker');
+// const seance = require('./queries/seance');
+const reaper = require('./queries/reaper');
 const timelock = require('./queries/timelock');
 const lockup = require('./queries/lockup');
 const utils = require('./utils');
@@ -23,8 +23,8 @@ module.exports = {
 	charts,
 	exchange,
 	soulsummoner,
-	seance,
-	maker,
+	// seance,
+	reaper,
 	timelock,
 	lockup,
 	utils,

@@ -5,8 +5,8 @@ const { SubscriptionClient } = require('subscriptions-transport-ws');
 
 const { request, gql } = require('graphql-request');
 
-const { graphAPIEndpoints, graphWSEndpoints, makerAddress } = require('./../constants');
-const { timestampToBlock } = require('./../utils');
+const { graphAPIEndpoints, graphWSEndpoints, reaperAddress } = require('../constants');
+const { timestampToBlock } = require('../utils');
 
 module.exports = {
 	async info({ block = undefined, timestamp = undefined } = {}) {
@@ -14,15 +14,15 @@ module.exports = {
 		block = block ? `block: { number: ${block} }` : '';
 
 		const result = await request(
-			graphAPIEndpoints.maker,
+			graphAPIEndpoints.reaper,
 			gql`{
-                    makers(first: 1, ${block}) {
+                    reapers(first: 1, ${block}) {
                         ${info.properties.toString()}
                     }
                 }`,
 		);
 
-		return info.callback(result.makers[0]);
+		return info.callback(result.reapers[0]);
 	},
 
 	servings({
@@ -33,7 +33,7 @@ module.exports = {
 		max = undefined,
 	} = {}) {
 		return pageResults({
-			api: graphAPIEndpoints.maker,
+			api: graphAPIEndpoints.reaper,
 			query: {
 				entity: 'servings',
 				selection: {
@@ -54,7 +54,7 @@ module.exports = {
 
 	async servers({ block = undefined, timestamp = undefined, max = undefined } = {}) {
 		return pageResults({
-			api: graphAPIEndpoints.maker,
+			api: graphAPIEndpoints.reaper,
 			query: {
 				entity: 'servers',
 				block: block ? { number: block } : timestamp ? { number: await timestampToBlock(timestamp) } : undefined,
@@ -73,7 +73,7 @@ module.exports = {
 				entity: 'users',
 				selection: {
 					where: {
-						id: `\\"${makerAddress}\\"`,
+						id: `\\"${reaperAddress}\\"`,
 					},
 				},
 				block: block ? { number: block } : timestamp ? { number: await timestampToBlock(timestamp) } : undefined,
@@ -88,7 +88,7 @@ module.exports = {
 	observePendingServings() {
 		const query = gql`
             subscription {
-                users(first: 1000, where: {id: "${makerAddress}"}) {
+                users(first: 1000, where: {id: "${reaperAddress}"}) {
                     ${pendingServings.properties.toString()}
                 }
         }`;

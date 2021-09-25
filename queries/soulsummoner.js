@@ -3,7 +3,7 @@ const pageResults = require('graph-results-pager');
 
 const { request, gql } = require('graphql-request');
 
-const { graphAPIEndpoints, chefAddress, TWENTY_FOUR_HOURS } = require('../constants');
+const { graphAPIEndpoints, summonerAddress, TWENTY_FOUR_HOURS } = require('../constants');
 const { blockToTimestamp, timestampToBlock, getAverageBlockTime } = require('../utils');
 const { BigInt } = require('is-bigint');
 const { pairs: exchangePairs } = require('./exchange');
@@ -17,7 +17,7 @@ module.exports = {
 		const result = await request(
 			graphAPIEndpoints.soulsummoner,
 			gql`{
-                    soulsummoner(id: "${chefAddress}", ${block}) {
+                    soulsummoner(id: "${summonerAddress}", ${block}) {
                         ${info.properties.toString()}
                     }
                 }`,
@@ -84,7 +84,7 @@ module.exports = {
 		const result = await request(
 			graphAPIEndpoints.exchange,
 			gql`{
-                    liquidityPosition(id: "${token_address.toLowerCase()}-${chefAddress}", ${block}) {
+                    liquidityPosition(id: "${token_address.toLowerCase()}-${summonerAddress}", ${block}) {
                         ${stakedValue.properties.toString()}
                     }
                 }`,
@@ -137,7 +137,7 @@ module.exports = {
 
 		const totalAllocPoint = soulsummonerList.reduce((a, b) => a + b.allocPoint, 0);
 
-		const averageBlockTime = await getAverageBlockTime({ block, timestamp });
+		// const averageBlockTime = await getAverageBlockTime({ block, timestamp });
 
 		return soulsummonerList.map((soulsummonerPool) => {
 			const exchangePool = exchangeList.find((e) => e.id === soulsummonerPool.pair);
@@ -146,8 +146,9 @@ module.exports = {
 			}
 
 			const tvl = soulsummonerPool.slpBalance * (exchangePool.reserveUSD / exchangePool.totalSupply);
-			const soulPerBlock = (soulsummonerPool.allocPoint / totalAllocPoint) * 100;
-			const apy = ((soulUSD * (soulPerBlock * (60 / averageBlockTime) * 60 * 24 * 365)) / tvl) * 100;
+			const soulPerSecond = (soulsummonerPool.allocPoint / totalAllocPoint) * 100;
+			// const apy = ((soulUSD * (soulPerSecond * (60 / averageBlockTime) * 60 * 24 * 365)) / tvl) * 100;
+			const apy = ((soulUSD * (soulPerSecond * 60 * 60 * 24 * 365)) / tvl) * 100;
 
 			return { ...soulsummonerPool, apy };
 		});
@@ -178,7 +179,7 @@ const info = {
 		'owner',
 		'startBlock',
 		'soul',
-		'soulPerBlock',
+		'soulPerSecond',
 		'totalAllocPoint',
 		'poolCount',
 		'slpBalance',
