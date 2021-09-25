@@ -2,7 +2,7 @@
 const pageResults = require('graph-results-pager');
 
 const { request, gql } = require('graphql-request');
-const blocklytics = 'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks';
+const blocklytics = 'https://api.thegraph.com/subgraphs/name/matthewlilley/fantom-blocks';
 
 const { getUnixTime, startOfHour, startOfMinute, startOfSecond, subHours } = require('date-fns');
 

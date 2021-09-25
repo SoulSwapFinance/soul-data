@@ -1,7 +1,7 @@
 module.exports = {
 	// todo: update endpoints and addresses
 	graphAPIEndpoints: {
-		soulsummoner: 'https://api.thegraph.com/subgraphs/name/SoulSwapFinance/soul-summoner',
+		summoner: 'https://api.thegraph.com/subgraphs/name/SoulSwapFinance/soul-summoner',
 		// seance: 'https://api.thegraph.com/subgraphs/name/SoulSwapFinance/seance-circle',
 		reaper: 'https://api.thegraph.com/subgraphs/name/SoulSwapFinance/soul-reaper',
 		exchange: 'https://api.thegraph.com/subgraphs/name/bunsdev/soulswap',

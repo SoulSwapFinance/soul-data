@@ -107,3 +107,5 @@ dist
 browser.js
 *.browser.js
 .DS_Store
+*browser
+browser.js

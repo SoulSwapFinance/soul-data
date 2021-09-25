@@ -1,7 +1,8 @@
 # Soul Data
 🕯 Query utility for SoulSwap-related data.
 
-This is a collection of utilities to query SoulSwap data from Ethereum. This data has been indexed by the Graph via the subgraph the SoulSwap team maintains.
+This is a collection of utilities to query SoulSwap data from Fantom. This data has been indexed by the Graph via the subgraph the SoulSwap team maintains.
+
 ## Supported Queries
 
 The below all return a Promise that resolves with the requested results.
@@ -32,15 +33,13 @@ The below all return a Promise that resolves with the requested results.
 24. `exchange.factory({¹})` Gets all data for the SoulSwap factory.
 25. `exchange.dayData({²})` Gets data for the SoulSwap factory broken down by day.
 26. `exchange.twentyFourHourData({¹})` Gets 24h data for the SoulSwap factory.
-27. `exchange_v1.userHistory({², user_address})` Gets LP history for specified user.
-28. `exchange_v1.userPositions({¹, user_address})` Gets LP positions for specified user.
-29. `soulsummoner.info({¹})` Gets SoulSummoner contract info.
-30. `soulsummoner.pool({¹, pool_id, pool_address})` Gets pool info, either by pool id or by pool address.
-31. `soulsummoner.pools({¹})` Gets pool info for all pools in SoulSummoner.
-32. `soulsummoner.user({¹, user_address})` Gets user's data for all of the user's pools.
-33. `soulsummoner.users({¹})` Gets all users and data for all of the users' pools.
-34. `soulsummoner.apys({¹})` Gets pool info for all pools in SoulSummoner including APYs.
-35. `soulsummoner.apys24h({¹})` Gets 24h pool info for all pools in SoulSummoner including APYs.
+29. `summoner.info({¹})` Gets SoulSummoner contract info.
+30. `summoner.pool({¹, pool_id, pool_address})` Gets pool info, either by pool id or by pool address.
+31. `summoner.pools({¹})` Gets pool info for all pools in SoulSummoner.
+32. `summoner.user({¹, user_address})` Gets user's data for all of the user's pools.
+33. `summoner.users({¹})` Gets all users and data for all of the users' pools.
+34. `summoner.apys({¹})` Gets pool info for all pools in SoulSummoner including APYs.
+35. `summoner.apys24h({¹})` Gets 24h pool info for all pools in SoulSummoner including APYs.
 36. `exchange.stakedValue({¹, token_address})` Get pricing info for SoulSummoner pool.
 <!-- 37. `seance.info({¹})` Gets SeanceCircle contract info. -->
 <!-- 38. `seance.user({¹, user_address})` Gets SeanceCircle data for specified user. -->
@@ -53,7 +52,6 @@ The below all return a Promise that resolves with the requested results.
 45. `timelock.executedTxs({²})` Gets executed Timelock transactions.
 46. `timelock.allTxs({²})` Gets all Timelock transactions.
 47. `lockup.user({¹, user_address})` Gets lockup data for specified user.
-48. `funeralbox.clones({masterAddress, chainId})` Gets Clone contracts for specified master contract.
 
 ¹ `{block, timestamp}` Supports fetching at a specific block / UNIX timestamp.    
 ² `{minBlock, maxBlock, minTimestamp, maxTimestamp}` Supports fetching in a specific timeframe.
@@ -84,13 +82,13 @@ const soulData = require('@soulswap/soul-data'); // common js
 import soulData from '@soulswap/soul-data'; // es modules
 
 // query and log resolved results
-soulData.soulsummoner
-  .pools({block: 11223344})
+soulData.summoner
+  .pools({block: 17337870}) // 25 AUG
   .then(pools => console.log(pools))
 
-soulData.timelock
-  .allTxs({minTimestamp: 1605239738, maxTimestamp: 1608239738})
-  .then(txs => console.log(txs))
+// soulData.timelock
+//   .allTxs({minTimestamp: 1605239738, maxTimestamp: 1608239738})
+//   .then(txs => console.log(txs))
 
 // soulData.seance
 //   .user({user_address: '0x6684977bbed67e101bb80fc07fccfba655c0a64f'})
@@ -101,5 +99,5 @@ soulData.exchange
   .subscribe({next: (pairs) => console.log(pairs), error: (err) => console.log(err)})
 
 soulData
-  .timeseries({blocks: [11407623, 11507623, 11607623], target: soulData.exchange.pair}, {pair_address: "0x795065dCc9f64b5614C407a6EFDC400DA6221FB0"})
+  .timeseries({blocks: [11407623, 11507623, 11607623], target: soulData.exchange.pair}, {pair_address: "0xa2527Af9DABf3E3B4979d7E0493b5e2C6e63dC57"}) // SOUL-WFTM // 25 AUG
 ```

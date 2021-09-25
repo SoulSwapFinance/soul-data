@@ -15,15 +15,15 @@ module.exports = {
 		block = block ? `block: { number: ${block} }` : '';
 
 		const result = await request(
-			graphAPIEndpoints.soulsummoner,
+			graphAPIEndpoints.summoner,
 			gql`{
-                    soulsummoner(id: "${summonerAddress}", ${block}) {
+                    summoner(id: "${summonerAddress}", ${block}) {
                         ${info.properties.toString()}
                     }
                 }`,
 		);
 
-		return info.callback(result.soulsummoner);
+		return info.callback(result.summoner);
 	},
 
 	async pool({ block = undefined, timestamp = undefined, pool_id = undefined, pool_address = undefined } = {}) {
@@ -37,7 +37,7 @@ module.exports = {
 		let result;
 		if (pool_id) {
 			result = await request(
-				graphAPIEndpoints.soulsummoner,
+				graphAPIEndpoints.summoner,
 				gql`{
                         pool(id: ${pool_id}, ${block}) {
                             ${pools.properties.toString()}
@@ -46,7 +46,7 @@ module.exports = {
 			);
 		} else {
 			result = await request(
-				graphAPIEndpoints.soulsummoner,
+				graphAPIEndpoints.summoner,
 				gql`{
                         pools(first: 1, where: {pair: "${pool_address.toLowerCase()}"}, ${block}) {
                             ${pools.properties.toString()}
@@ -60,7 +60,7 @@ module.exports = {
 
 	async pools({ block = undefined, timestamp = undefined } = {}) {
 		return pageResults({
-			api: graphAPIEndpoints.soulsummoner,
+			api: graphAPIEndpoints.summoner,
 			query: {
 				entity: 'pools',
 				selection: {
@@ -99,7 +99,7 @@ module.exports = {
 		}
 
 		return pageResults({
-			api: graphAPIEndpoints.soulsummoner,
+			api: graphAPIEndpoints.summoner,
 			query: {
 				entity: 'users',
 				selection: {
@@ -117,7 +117,7 @@ module.exports = {
 
 	async users({ block = undefined, timestamp = undefined } = {}) {
 		return pageResults({
-			api: graphAPIEndpoints.soulsummoner,
+			api: graphAPIEndpoints.summoner,
 			query: {
 				entity: 'users',
 				selection: {
@@ -131,26 +131,26 @@ module.exports = {
 	},
 
 	async apys({ block = undefined, timestamp = undefined } = {}) {
-		const soulsummonerList = await module.exports.pools({ block, timestamp });
+		const summonerList = await module.exports.pools({ block, timestamp });
 		const exchangeList = await exchangePairs({ block, timestamp });
 		const soulUSD = await soulPriceUSD({ block, timestamp });
 
-		const totalAllocPoint = soulsummonerList.reduce((a, b) => a + b.allocPoint, 0);
+		const totalAllocPoint = summonerList.reduce((a, b) => a + b.allocPoint, 0);
 
 		// const averageBlockTime = await getAverageBlockTime({ block, timestamp });
 
-		return soulsummonerList.map((soulsummonerPool) => {
-			const exchangePool = exchangeList.find((e) => e.id === soulsummonerPool.pair);
+		return summonerList.map((summonerPool) => {
+			const exchangePool = exchangeList.find((e) => e.id === summonerPool.pair);
 			if (!exchangePool) {
-				return { ...soulsummonerPool, apy: 0 };
+				return { ...summonerPool, apy: 0 };
 			}
 
-			const tvl = soulsummonerPool.slpBalance * (exchangePool.reserveUSD / exchangePool.totalSupply);
-			const soulPerSecond = (soulsummonerPool.allocPoint / totalAllocPoint) * 100;
+			const tvl = summonerPool.slpBalance * (exchangePool.reserveUSD / exchangePool.totalSupply);
+			const soulPerSecond = (summonerPool.allocPoint / totalAllocPoint) * 100;
 			// const apy = ((soulUSD * (soulPerSecond * (60 / averageBlockTime) * 60 * 24 * 365)) / tvl) * 100;
 			const apy = ((soulUSD * (soulPerSecond * 60 * 60 * 24 * 365)) / tvl) * 100;
 
-			return { ...soulsummonerPool, apy };
+			return { ...summonerPool, apy };
 		});
 	},
 
