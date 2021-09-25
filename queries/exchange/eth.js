@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 const ws = require('isomorphic-ws');
 const { SubscriptionClient } = require('subscriptions-transport-ws');
 
@@ -44,17 +45,15 @@ module.exports = {
 			time += 3600;
 		}
 
-		// const blocks = await timestampsToBlocks(timestamps);
+		const blocks = await timestampsToBlocks(timestamps);
 
-		// const query = (
-		// 	gql`{
-        //         ${blocks.map(
-		// 							(block, i) => gql`
-        //             timestamp${timestamps[i]}: bundle(id: 1, block: {number: ${block}}) {
-        //                 ${ethPrice.properties.toString()}
-        //         }`,
-		// 						)}
-        //     }`;
+		const query = gql`{
+		        ${blocks.map(
+		(block, i) => gql`
+				timestamp${timestamps[i]}: bundle(id: 1, block: {number: ${block}}) {
+					${ethPrice.properties.toString()}
+				}`,)}
+		}`;
 
 		let result = await request(graphAPIEndpoints.exchange, query);
 

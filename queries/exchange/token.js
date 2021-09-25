@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const pageResults = require('graph-results-pager');
 
 const ws = require('isomorphic-ws');
@@ -13,13 +15,16 @@ const { timestampToBlock, timestampsToBlocks, blockToTimestamp } = require('./..
 const { ethPrice } = require('./../exchange/eth');
 
 module.exports = {
-	async token({block = undefined, timestamp = undefined, token_address = undefined} = {}) {
-		if(!token_address) { throw new Error('soul-data: Token address undefined'); }
+	async token({ block = undefined, timestamp = undefined, token_address = undefined } = {}) {
+		if (!token_address) {
+			throw new Error('soul-data: Token address undefined');
+		}
 
-		block = block ? block : timestamp ? (await timestampToBlock(timestamp)) : undefined;
+		block = block ? block : timestamp ? await timestampToBlock(timestamp) : undefined;
 		block = block ? `block: { number: ${block} }` : '';
 
-		const result = await request(graphAPIEndpoints.exchange,
+		const result = await request(
+			graphAPIEndpoints.exchange,
 			gql`{
                     token(id: "${token_address.toLowerCase()}", ${block}) {
                         ${tokens.properties.toString()}
@@ -30,10 +35,12 @@ module.exports = {
 		return tokens.callback([result.token])[0];
 	},
 
-	async token24h({block = undefined, timestamp = undefined, token_address = undefined} = {}) {
-		if(!token_address) { throw new Error('soul-data: Token address undefined'); }
+	async token24h({ block = undefined, timestamp = undefined, token_address = undefined } = {}) {
+		if (!token_address) {
+			throw new Error('soul-data: Token address undefined');
+		}
 
-		let timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : (Math.floor(Date.now() / 1000));
+		const timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : Math.floor(Date.now() / 1000);
 		timestamp24ago = timestampNow - TWENTY_FOUR_HOURS;
 		timestamp48ago = timestamp24ago - TWENTY_FOUR_HOURS;
 
@@ -41,18 +48,26 @@ module.exports = {
 		block24ago = await timestampToBlock(timestamp24ago);
 		block48ago = await timestampToBlock(timestamp48ago);
 
-		const result = await module.exports.token({block: block, token_address});
-		const result24ago = await module.exports.token({block: block24ago, token_address});
-		const result48ago = await module.exports.token({block: block48ago, token_address});
+		const result = await module.exports.token({ block: block, token_address });
+		const result24ago = await module.exports.token({ block: block24ago, token_address });
+		const result48ago = await module.exports.token({ block: block48ago, token_address });
 
-		const ethPriceUSD = await ethPrice({block: block});
-		const ethPriceUSD24ago = await ethPrice({block: block24ago});
+		const ethPriceUSD = await ethPrice({ block: block });
+		const ethPriceUSD24ago = await ethPrice({ block: block24ago });
 
 		return tokens.callback24h([result], [result24ago], [result48ago], ethPriceUSD, ethPriceUSD24ago)[0];
 	},
 
-	async tokenHourData({minTimestamp = undefined, maxTimestamp = undefined, minBlock = undefined, maxBlock = undefined, token_address = undefined} = {}) {
-		if(!token_address) { throw new Error('soul-data: Token address undefined'); }
+	async tokenHourData({
+		minTimestamp = undefined,
+		maxTimestamp = undefined,
+		minBlock = undefined,
+		maxBlock = undefined,
+		token_address = undefined,
+	} = {}) {
+		if (!token_address) {
+			throw new Error('soul-data: Token address undefined');
+		}
 
 		minTimestamp = minBlock ? blockToTimestamp(minBlock) : minTimestamp;
 		maxTimestamp = maxBlock ? blockToTimestamp(maxBlock) : maxTimestamp;
@@ -71,24 +86,32 @@ module.exports = {
 
 		// const query = (
 		// 	gql`{
-        //         ${blocks.map(
+		//         ${blocks.map(
 		// 							(block, i) => gql`
-        //             timestamp${timestamps[i]}: token(id: "${token_address.toLowerCase()}", block: {number: ${block}}) {
-        //                 ${tokens.properties.toString()}
-        //         }`,
+		//             timestamp${timestamps[i]}: token(id: "${token_address.toLowerCase()}", block: {number: ${block}}) {
+		//                 ${tokens.properties.toString()}
+		//         }`,
 		// 						)}
-        //     }`;
+		//     }`;
 
 		let result = await request(graphAPIEndpoints.exchange, query);
 		result = Object.keys(result)
-			.map(key => ({...result[key], timestamp: Number(key.split('timestamp')[1])}))
-			.sort((a, b) => (a.timestamp) - (b.timestamp));
+			.map((key) => ({ ...result[key], timestamp: Number(key.split('timestamp')[1]) }))
+			.sort((a, b) => a.timestamp - b.timestamp);
 
 		return tokens.callbackHourData(result);
 	},
 
-	async tokenDayData({minTimestamp = undefined, maxTimestamp = undefined, minBlock = undefined, maxBlock = undefined, token_address = undefined} = {}) {
-		if(!token_address) { throw new Error('soul-data: Token address undefined'); }
+	async tokenDayData({
+		minTimestamp = undefined,
+		maxTimestamp = undefined,
+		minBlock = undefined,
+		maxBlock = undefined,
+		token_address = undefined,
+	} = {}) {
+		if (!token_address) {
+			throw new Error('soul-data: Token address undefined');
+		}
 
 		return pageResults({
 			api: graphAPIEndpoints.exchange,
@@ -102,15 +125,17 @@ module.exports = {
 						date_lte: maxTimestamp || (maxBlock ? await blockToTimestamp(maxBlock) : undefined),
 					},
 				},
-				properties: tokens.propertiesDayData
-			}
+				properties: tokens.propertiesDayData,
+			},
 		})
-			.then(results => tokens.callbackDayData(results))
-			.catch(err => console.log(err));
+			.then((results) => tokens.callbackDayData(results))
+			.catch((err) => console.log(err));
 	},
 
-	observeToken({token_address = undefined}) {
-		if(!token_address) { throw new Error('soul-data: Token address undefined'); }
+	observeToken({ token_address = undefined }) {
+		if (!token_address) {
+			throw new Error('soul-data: Token address undefined');
+		}
 
 		const query = gql`
             subscription {
@@ -119,23 +144,23 @@ module.exports = {
                 }
         }`;
 
-		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true, }, ws,);
+		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true }, ws);
 		const observable = client.request({ query });
 
 		return {
-			subscribe({next, error, complete}) {
+			subscribe({ next, error, complete }) {
 				return observable.subscribe({
 					next(results) {
 						next(tokens.callback([results.data.token])[0]);
 					},
 					error,
-					complete
+					complete,
 				});
-			}
+			},
 		};
 	},
 
-	async tokens({block = undefined, timestamp = undefined, max = undefined} = {}) {
+	async tokens({ block = undefined, timestamp = undefined, max = undefined } = {}) {
 		return pageResults({
 			api: graphAPIEndpoints.exchange,
 			query: {
@@ -143,16 +168,16 @@ module.exports = {
 				selection: {
 					block: block ? { number: block } : timestamp ? { number: await timestampToBlock(timestamp) } : undefined,
 				},
-				properties: tokens.properties
+				properties: tokens.properties,
 			},
-			max
+			max,
 		})
-			.then(results => tokens.callback(results))
-			.catch(err => console.log(err));
+			.then((results) => tokens.callback(results))
+			.catch((err) => console.log(err));
 	},
 
-	async tokens24h({block = undefined, timestamp = undefined, max = undefined} = {}) {
-		let timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : (Math.floor(Date.now() / 1000));
+	async tokens24h({ block = undefined, timestamp = undefined, max = undefined } = {}) {
+		const timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : Math.floor(Date.now() / 1000);
 		timestamp24ago = timestampNow - TWENTY_FOUR_HOURS;
 		timestamp48ago = timestamp24ago - TWENTY_FOUR_HOURS;
 
@@ -160,12 +185,12 @@ module.exports = {
 		block24ago = await timestampToBlock(timestamp24ago);
 		block48ago = await timestampToBlock(timestamp48ago);
 
-		const results = await module.exports.tokens({block: block, max});
-		const results24ago = await module.exports.tokens({block: block24ago, max});
-		const results48ago = await module.exports.tokens({block: block48ago, max});
+		const results = await module.exports.tokens({ block: block, max });
+		const results24ago = await module.exports.tokens({ block: block24ago, max });
+		const results48ago = await module.exports.tokens({ block: block48ago, max });
 
-		const ethPriceUSD = await ethPrice({block: block});
-		const ethPriceUSD24ago = await ethPrice({block: block24ago});
+		const ethPriceUSD = await ethPrice({ block: block });
+		const ethPriceUSD24ago = await ethPrice({ block: block24ago });
 
 		return tokens.callback24h(results, results24ago, results48ago, ethPriceUSD, ethPriceUSD24ago);
 	},
@@ -178,19 +203,19 @@ module.exports = {
                 }
         }`;
 
-		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true, }, ws,);
+		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true }, ws);
 		const observable = client.request({ query });
 
 		return {
-			subscribe({next, error, complete}) {
+			subscribe({ next, error, complete }) {
 				return observable.subscribe({
 					next(results) {
 						next(tokens.callback(results.data.tokens));
 					},
 					error,
-					complete
+					complete,
 				});
-			}
+			},
 		};
 	},
 };
@@ -207,12 +232,25 @@ const tokens = {
 		'untrackedVolumeUSD',
 		'txCount',
 		'liquidity',
-		'derivedETH'
+		'derivedETH',
 	],
 
 	callback(results) {
 		return results
-			.map(({ id, symbol, name, decimals, totalSupply, volume, volumeUSD, untrackedVolumeUSD, txCount, liquidity, derivedETH }) => ({
+			.map(
+				({
+					id,
+					symbol,
+					name,
+					decimals,
+					totalSupply,
+					volume,
+					volumeUSD,
+					untrackedVolumeUSD,
+					txCount,
+					liquidity,
+					derivedETH,
+				}) => ({
 					id: id,
 					symbol: symbol,
 					name: name,
@@ -223,47 +261,64 @@ const tokens = {
 					untrackedVolumeUSD: Number(untrackedVolumeUSD),
 					txCount: Number(txCount),
 					liquidity: Number(liquidity),
-				derivedETH: Number(derivedETH)
-			}))
+					derivedETH: Number(derivedETH),
+				}),
+			)
 			.sort((a, b) => b.volumeUSD - a.volumeUSD);
 	},
 
 	callback24h(results, results24h, results48h, ethPriceUSD, ethPriceUSD24ago) {
-		return results.map(result => {
-			const result24h = results24h.find(e => e.id === result.id) || result;
-			const result48h = results48h.find(e => e.id === result.id) || result;
+		return results.map((result) => {
+			const result24h = results24h.find((e) => e.id === result.id) || result;
+			const result48h = results48h.find((e) => e.id === result.id) || result;
 
-			return ({
+			return {
 				...result,
 
 				priceUSD: result.derivedETH * ethPriceUSD,
-				priceUSDChange: (result.derivedETH * ethPriceUSD) / (result24h.derivedETH * ethPriceUSD24ago) * 100 - 100,
-				priceUSDChangeCount: (result.derivedETH * ethPriceUSD) - (result24h.derivedETH * ethPriceUSD24ago),
+				priceUSDChange: ((result.derivedETH * ethPriceUSD) / (result24h.derivedETH * ethPriceUSD24ago)) * 100 - 100,
+				priceUSDChangeCount: result.derivedETH * ethPriceUSD - result24h.derivedETH * ethPriceUSD24ago,
 
 				liquidityUSD: result.liquidity * result.derivedETH * ethPriceUSD,
-				liquidityUSDChange: (result.liquidity * result.derivedETH * ethPriceUSD) / (result24h.liquidity * result24h.derivedETH * ethPriceUSD24ago) * 100 - 100,
-				liquidityUSDChangeCount: result.liquidity * result.derivedETH * ethPriceUSD - result24h.liquidity * result24h.derivedETH * ethPriceUSD24ago,
+				liquidityUSDChange:
+					((result.liquidity * result.derivedETH * ethPriceUSD) /
+						(result24h.liquidity * result24h.derivedETH * ethPriceUSD24ago)) *
+						100 -
+					100,
+				liquidityUSDChangeCount:
+					result.liquidity * result.derivedETH * ethPriceUSD -
+					result24h.liquidity * result24h.derivedETH * ethPriceUSD24ago,
 
 				liquidityETH: result.liquidity * result.derivedETH,
-				liquidityETHChange: (result.liquidity * result.derivedETH) / (result24h.liquidity * result24h.derivedETH) * 100 - 100,
+				liquidityETHChange:
+					((result.liquidity * result.derivedETH) / (result24h.liquidity * result24h.derivedETH)) * 100 - 100,
 				liquidityETHChangeCount: result.liquidity * result.derivedETH - result24h.liquidity * result24h.derivedETH,
 
 				volumeUSDOneDay: result.volumeUSD - result24h.volumeUSD,
-				volumeUSDChange: (result.volumeUSD - result24h.volumeUSD) / (result24h.volumeUSD - result48h.volumeUSD) * 100 - 100,
-				volumeUSDChangeCount: (result.volumeUSD - result24h.volumeUSD) - (result24h.volumeUSD - result48h.volumeUSD),
+				volumeUSDChange:
+					((result.volumeUSD - result24h.volumeUSD) / (result24h.volumeUSD - result48h.volumeUSD)) * 100 - 100,
+				volumeUSDChangeCount: result.volumeUSD - result24h.volumeUSD - (result24h.volumeUSD - result48h.volumeUSD),
 
 				untrackedVolumeUSDOneDay: result.untrackedVolumeUSD - result24h.untrackedVolumeUSD,
-				untrackedVolumeUSDChange: (result.untrackedVolumeUSD - result24h.untrackedVolumeUSD) / (result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD) * 100 - 100,
-				untrackedVolumeUSDChangeCount: (result.untrackedVolumeUSD - result24h.untrackedVolumeUSD) - (result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD),
+				untrackedVolumeUSDChange:
+					((result.untrackedVolumeUSD - result24h.untrackedVolumeUSD) /
+						(result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD)) *
+						100 -
+					100,
+				untrackedVolumeUSDChangeCount:
+					result.untrackedVolumeUSD -
+					result24h.untrackedVolumeUSD -
+					(result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD),
 
 				txCountOneDay: result.txCount - result24h.txCount,
-				txCountChange: (result.txCount - result24h.txCount) / (result24h.txCount - result48h.txCount) * 100 - 100,
-				txCountChangeCount: (result.txCount - result24h.txCount) - (result24h.txCount - result48h.txCount),
-			});});
+				txCountChange: ((result.txCount - result24h.txCount) / (result24h.txCount - result48h.txCount)) * 100 - 100,
+				txCountChangeCount: result.txCount - result24h.txCount - (result24h.txCount - result48h.txCount),
+			};
+		});
 	},
 
 	callbackHourData(results) {
-		return results.map(result => ({
+		return results.map((result) => ({
 			id: result.id,
 			symbol: result.symbol,
 			name: result.name,
@@ -275,7 +330,7 @@ const tokens = {
 			txCount: Number(result.txCount),
 			liquidity: Number(result.liquidity),
 			derivedETH: Number(result.derivedETH),
-			timestamp: result.timestamp
+			timestamp: result.timestamp,
 		}));
 	},
 
@@ -289,11 +344,11 @@ const tokens = {
 		'liquidityETH',
 		'liquidityUSD',
 		'priceUSD',
-		'txCount'
+		'txCount',
 	],
 
 	callbackDayData(results) {
-		return results.map(result => ({
+		return results.map((result) => ({
 			id: result.id,
 			date: new Date(result.date * 1000),
 			timestamp: Number(result.date),
@@ -304,7 +359,7 @@ const tokens = {
 			liquidityETH: Number(result.liquidityETH),
 			liquidityUSD: Number(result.liquidityUSD),
 			priceUSD: Number(result.priceUSD),
-			txCount: Number(result.txCount)
+			txCount: Number(result.txCount),
 		}));
-	}
+	},
 };

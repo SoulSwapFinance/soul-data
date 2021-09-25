@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const pageResults = require('graph-results-pager');
 
 const ws = require('isomorphic-ws');
@@ -13,13 +15,16 @@ const { timestampToBlock, timestampsToBlocks, blockToTimestamp } = require('./..
 const { ethPrice } = require('./../exchange/eth');
 
 module.exports = {
-	async pair({block = undefined, timestamp = undefined, pair_address = undefined} = {}) {
-		if(!pair_address) { throw new Error('soul-data: Pair address undefined'); }
+	async pair({ block = undefined, timestamp = undefined, pair_address = undefined } = {}) {
+		if (!pair_address) {
+			throw new Error('soul-data: Pair address undefined');
+		}
 
-		block = block ? block : timestamp ? (await timestampToBlock(timestamp)) : undefined;
+		block = block ? block : timestamp ? await timestampToBlock(timestamp) : undefined;
 		block = block ? `block: { number: ${block} }` : '';
 
-		const result = await request(graphAPIEndpoints.exchange,
+		const result = await request(
+			graphAPIEndpoints.exchange,
 			gql`{
                     pair(id: "${pair_address.toLowerCase()}", ${block}) {
                         ${pairs.properties.toString()}
@@ -30,10 +35,12 @@ module.exports = {
 		return pairs.callback([result.pair])[0];
 	},
 
-	async pair24h({block = undefined, timestamp = undefined, pair_address = undefined} = {}) {
-		if(!pair_address) { throw new Error('soul-data: Pair address undefined'); }
+	async pair24h({ block = undefined, timestamp = undefined, pair_address = undefined } = {}) {
+		if (!pair_address) {
+			throw new Error('soul-data: Pair address undefined');
+		}
 
-		let timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : (Math.floor(Date.now() / 1000));
+		const timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : Math.floor(Date.now() / 1000);
 		timestamp24ago = timestampNow - TWENTY_FOUR_HOURS;
 		timestamp48ago = timestamp24ago - TWENTY_FOUR_HOURS;
 
@@ -41,18 +48,26 @@ module.exports = {
 		block24ago = await timestampToBlock(timestamp24ago);
 		block48ago = await timestampToBlock(timestamp48ago);
 
-		const result = await module.exports.pair({block: block, pair_address});
-		const result24ago = await module.exports.pair({block: block24ago, pair_address});
-		const result48ago = await module.exports.pair({block: block48ago, pair_address});
+		const result = await module.exports.pair({ block: block, pair_address });
+		const result24ago = await module.exports.pair({ block: block24ago, pair_address });
+		const result48ago = await module.exports.pair({ block: block48ago, pair_address });
 
-		const ethPriceUSD = await ethPrice({block: block});
-		const ethPriceUSD24ago = await ethPrice({block: block24ago});
+		const ethPriceUSD = await ethPrice({ block: block });
+		const ethPriceUSD24ago = await ethPrice({ block: block24ago });
 
 		return pairs.callback24h([result], [result24ago], [result48ago], ethPriceUSD, ethPriceUSD24ago)[0];
 	},
 
-	async pairHourData({minTimestamp = undefined, maxTimestamp = undefined, minBlock = undefined, maxBlock = undefined, pair_address = undefined} = {}) {
-		if(!pair_address) { throw new Error('soul-data: Pair address undefined'); }
+	async pairHourData({
+		minTimestamp = undefined,
+		maxTimestamp = undefined,
+		minBlock = undefined,
+		maxBlock = undefined,
+		pair_address = undefined,
+	} = {}) {
+		if (!pair_address) {
+			throw new Error('soul-data: Pair address undefined');
+		}
 
 		minTimestamp = minBlock ? blockToTimestamp(minBlock) : minTimestamp;
 		maxTimestamp = maxBlock ? blockToTimestamp(maxBlock) : maxTimestamp;
@@ -71,24 +86,32 @@ module.exports = {
 
 		// const query = (
 		// 	gql`{
-        //         ${blocks.map(
+		//         ${blocks.map(
 		// 							(block, i) => gql`
-        //             timestamp${timestamps[i]}: pair(id: "${pair_address.toLowerCase()}", block: {number: ${block}}) {
-        //                 ${pairs.properties.toString()}
-        //         }`,
+		//             timestamp${timestamps[i]}: pair(id: "${pair_address.toLowerCase()}", block: {number: ${block}}) {
+		//                 ${pairs.properties.toString()}
+		//         }`,
 		// 						)}
-        //     }`;
+		//     }`;
 
 		let result = await request(graphAPIEndpoints.exchange, query);
 		result = Object.keys(result)
-			.map(key => ({...result[key], timestamp: Number(key.split('timestamp')[1])}))
-			.sort((a, b) => (a.timestamp) - (b.timestamp));
+			.map((key) => ({ ...result[key], timestamp: Number(key.split('timestamp')[1]) }))
+			.sort((a, b) => a.timestamp - b.timestamp);
 
 		return pairs.callbackHourData(result);
 	},
 
-	async pairDayData({minTimestamp = undefined, maxTimestamp = undefined, minBlock = undefined, maxBlock = undefined, pair_address = undefined} = {}) {
-		if(!pair_address) { throw new Error('soul-data: Pair address undefined'); }
+	async pairDayData({
+		minTimestamp = undefined,
+		maxTimestamp = undefined,
+		minBlock = undefined,
+		maxBlock = undefined,
+		pair_address = undefined,
+	} = {}) {
+		if (!pair_address) {
+			throw new Error('soul-data: Pair address undefined');
+		}
 
 		return pageResults({
 			api: graphAPIEndpoints.exchange,
@@ -102,15 +125,17 @@ module.exports = {
 						date_lte: maxTimestamp || (maxBlock ? await blockToTimestamp(maxBlock) : undefined),
 					},
 				},
-				properties: pairs.propertiesDayData
-			}
+				properties: pairs.propertiesDayData,
+			},
 		})
-			.then(results => pairs.callbackDayData(results))
-			.catch(err => console.log(err));
+			.then((results) => pairs.callbackDayData(results))
+			.catch((err) => console.log(err));
 	},
 
-	observePair({pair_address = undefined}) {
-		if(!pair_address) { throw new Error('soul-data: Pair address undefined'); }
+	observePair({ pair_address = undefined }) {
+		if (!pair_address) {
+			throw new Error('soul-data: Pair address undefined');
+		}
 
 		const query = gql`
             subscription {
@@ -119,36 +144,36 @@ module.exports = {
                 }
             }`;
 
-		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true, }, ws,);
+		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true }, ws);
 		const observable = client.request({ query });
 
 		return {
-			subscribe({next, error, complete}) {
+			subscribe({ next, error, complete }) {
 				return observable.subscribe({
 					next(results) {
 						next(pairs.callback([results.data.pair])[0]);
 					},
 					error,
-					complete
+					complete,
 				});
-			}
+			},
 		};
 	},
 
-	async pairs({block = undefined, timestamp = undefined, max = undefined, pair_addresses = undefined} = {}) {
-		if(pair_addresses) {
+	async pairs({ block = undefined, timestamp = undefined, max = undefined, pair_addresses = undefined } = {}) {
+		if (pair_addresses) {
 			block = block ? block : timestamp ? await timestampToBlock(timestamp) : undefined;
 			block = block ? `block: { number: ${block} }` : '';
 
 			// const query = (
 			// 	gql`{
-            //         ${pair_addresses.map(
+			//         ${pair_addresses.map(
 			// 								(pair, i) => `
-            //             pair${i}: pair(id: "${pair.toLowerCase()}", ${block}) {
-            //                 ${pairs.properties.toString()}
-            //         }`,
+			//             pair${i}: pair(id: "${pair.toLowerCase()}", ${block}) {
+			//                 ${pairs.properties.toString()}
+			//         }`,
 			// 							)}
-            //     }`;
+			//     }`;
 
 			const result = Object.values(await request(graphAPIEndpoints.exchange, query));
 
@@ -162,16 +187,16 @@ module.exports = {
 				selection: {
 					block: block ? { number: block } : timestamp ? { number: await timestampToBlock(timestamp) } : undefined,
 				},
-				properties: pairs.properties
+				properties: pairs.properties,
 			},
-			max
+			max,
 		})
-			.then(results => pairs.callback(results))
-			.catch(err => console.log(err));
+			.then((results) => pairs.callback(results))
+			.catch((err) => console.log(err));
 	},
 
-	async pairs24h({block = undefined, timestamp = undefined, max = undefined} = {}) {
-		let timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : (Math.floor(Date.now() / 1000));
+	async pairs24h({ block = undefined, timestamp = undefined, max = undefined } = {}) {
+		const timestampNow = timestamp ? timestamp : block ? await blockToTimestamp(block) : Math.floor(Date.now() / 1000);
 		timestamp24ago = timestampNow - TWENTY_FOUR_HOURS;
 		timestamp48ago = timestamp24ago - TWENTY_FOUR_HOURS;
 
@@ -179,12 +204,12 @@ module.exports = {
 		block24ago = await timestampToBlock(timestamp24ago);
 		block48ago = await timestampToBlock(timestamp48ago);
 
-		const results = await module.exports.pairs({block: block, max});
-		const results24ago = await module.exports.pairs({block: block24ago, max});
-		const results48ago = await module.exports.pairs({block: block48ago, max});
+		const results = await module.exports.pairs({ block: block, max });
+		const results24ago = await module.exports.pairs({ block: block24ago, max });
+		const results48ago = await module.exports.pairs({ block: block48ago, max });
 
-		const ethPriceUSD = await ethPrice({block: block});
-		const ethPriceUSD24ago = await ethPrice({block: block24ago});
+		const ethPriceUSD = await ethPrice({ block: block });
+		const ethPriceUSD24ago = await ethPrice({ block: block24ago });
 
 		return pairs.callback24h(results, results24ago, results48ago, ethPriceUSD, ethPriceUSD24ago);
 	},
@@ -197,21 +222,21 @@ module.exports = {
                 }
         }`;
 
-		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true, }, ws,);
+		const client = new SubscriptionClient(graphWSEndpoints.exchange, { reconnect: true }, ws);
 		const observable = client.request({ query });
 
 		return {
-			subscribe({next, error, complete}) {
+			subscribe({ next, error, complete }) {
 				return observable.subscribe({
 					next(results) {
 						next(pairs.callback(results.data.pairs));
 					},
 					error,
-					complete
+					complete,
 				});
-			}
+			},
 		};
-	}
+	},
 };
 
 const pairs = {
@@ -236,16 +261,16 @@ const pairs = {
 
 	callback(results) {
 		return results
-			.map(result => ({
+			.map((result) => ({
 				id: result.id,
-				token0: { 
+				token0: {
 					id: result.token0.id,
 					name: result.token0.name,
 					symbol: result.token0.symbol,
 					totalSupply: Number(result.token0.totalSupply),
 					derivedETH: Number(result.token0.derivedETH),
 				},
-				token1: { 
+				token1: {
 					id: result.token1.id,
 					name: result.token1.name,
 					symbol: result.token1.symbol,
@@ -266,49 +291,60 @@ const pairs = {
 				untrackedVolumeUSD: Number(result.untrackedVolumeUSD),
 				txCount: Number(result.txCount),
 			}))
-			.sort((a, b) => b.reserveUSD - a.reserveUSD);     
+			.sort((a, b) => b.reserveUSD - a.reserveUSD);
 	},
 
 	callback24h(results, results24h, results48h, ethPriceUSD, ethPriceUSD24ago) {
-		return results.map(result => {
-			const result24h = results24h.find(e => e.id === result.id) || result;
-			const result48h = results48h.find(e => e.id === result.id) || result;
+		return results.map((result) => {
+			const result24h = results24h.find((e) => e.id === result.id) || result;
+			const result48h = results48h.find((e) => e.id === result.id) || result;
 
-			return ({
+			return {
 				...result,
 
 				trackedReserveUSD: result.trackedReserveETH * ethPriceUSD,
-				trackedReserveUSDChange: (result.trackedReserveETH * ethPriceUSD) / (result24h.trackedReserveETH * ethPriceUSD24ago) * 100 - 100,
-				trackedReserveUSDChangeCount: result.trackedReserveETH * ethPriceUSD - result24h.trackedReserveETH* ethPriceUSD24ago,
+				trackedReserveUSDChange:
+					((result.trackedReserveETH * ethPriceUSD) / (result24h.trackedReserveETH * ethPriceUSD24ago)) * 100 - 100,
+				trackedReserveUSDChangeCount:
+					result.trackedReserveETH * ethPriceUSD - result24h.trackedReserveETH * ethPriceUSD24ago,
 
 				trackedReserveETHChange: (result.trackedReserveETH / result24h.trackedReserveETH) * 100 - 100,
 				trackedReserveETHChangeCount: result.trackedReserveETH - result24h.trackedReserveETH,
 
 				volumeUSDOneDay: result.volumeUSD - result24h.volumeUSD,
-				volumeUSDChange: (result.volumeUSD - result24h.volumeUSD) / (result24h.volumeUSD - result48h.volumeUSD) * 100 - 100,
-				volumeUSDChangeCount: (result.volumeUSD - result24h.volumeUSD) - (result24h.volumeUSD - result48h.volumeUSD),
+				volumeUSDChange:
+					((result.volumeUSD - result24h.volumeUSD) / (result24h.volumeUSD - result48h.volumeUSD)) * 100 - 100,
+				volumeUSDChangeCount: result.volumeUSD - result24h.volumeUSD - (result24h.volumeUSD - result48h.volumeUSD),
 
 				untrackedVolumeUSDOneDay: result.untrackedVolumeUSD - result24h.untrackedVolumeUSD,
-				untrackedVolumeUSDChange: (result.untrackedVolumeUSD - result24h.untrackedVolumeUSD) / (result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD) * 100 - 100,
-				untrackedVolumeUSDChangeCount: (result.untrackedVolumeUSD - result24h.untrackedVolumeUSD) - (result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD),
+				untrackedVolumeUSDChange:
+					((result.untrackedVolumeUSD - result24h.untrackedVolumeUSD) /
+						(result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD)) *
+						100 -
+					100,
+				untrackedVolumeUSDChangeCount:
+					result.untrackedVolumeUSD -
+					result24h.untrackedVolumeUSD -
+					(result24h.untrackedVolumeUSD - result48h.untrackedVolumeUSD),
 
 				txCountOneDay: result.txCount - result24h.txCount,
-				txCountChange: (result.txCount - result24h.txCount) / (result24h.txCount - result48h.txCount) * 100 - 100,
-				txCountChangeCount: (result.txCount - result24h.txCount) - (result24h.txCount - result48h.txCount),
-			});});
+				txCountChange: ((result.txCount - result24h.txCount) / (result24h.txCount - result48h.txCount)) * 100 - 100,
+				txCountChangeCount: result.txCount - result24h.txCount - (result24h.txCount - result48h.txCount),
+			};
+		});
 	},
 
 	callbackHourData(results) {
-		return results.map(result => ({
+		return results.map((result) => ({
 			id: result.id,
-			token0: { 
+			token0: {
 				id: result.token0.id,
 				name: result.token0.name,
 				symbol: result.token0.symbol,
 				totalSupply: Number(result.token0.totalSupply),
 				derivedETH: Number(result.token0.derivedETH),
 			},
-			token1: { 
+			token1: {
 				id: result.token1.id,
 				name: result.token1.name,
 				symbol: result.token1.symbol,
@@ -328,22 +364,14 @@ const pairs = {
 			volumeUSD: Number(result.volumeUSD),
 			untrackedVolumeUSD: Number(result.untrackedVolumeUSD),
 			txCount: Number(result.txCount),
-			timestamp: result.timestamp
+			timestamp: result.timestamp,
 		}));
 	},
 
-	propertiesDayData: [
-		'id',
-		'date',
-		'volumeUSD',
-		'volumeToken0',
-		'volumeToken1',
-		'reserveUSD',
-		'txCount'
-	],
+	propertiesDayData: ['id', 'date', 'volumeUSD', 'volumeToken0', 'volumeToken1', 'reserveUSD', 'txCount'],
 
 	callbackDayData(results) {
-		return results.map(result => ({
+		return results.map((result) => ({
 			id: result.id,
 			date: new Date(result.date * 1000),
 			timestamp: Number(result.date),
@@ -351,7 +379,7 @@ const pairs = {
 			volumeToken0: Number(result.volumeToken0),
 			volumeToken1: Number(result.volumeToken1),
 			liquidityUSD: Number(result.reserveUSD),
-			txCount: Number(result.txCount)
+			txCount: Number(result.txCount),
 		}));
-	}
+	},
 };
