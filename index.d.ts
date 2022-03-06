@@ -3,7 +3,7 @@ import blocks = require("./typings/blocks");
 import charts = require("./typings/charts");
 import exchange = require("./typings/exchange");
 import summoner = require("./typings/summoner");
-import reaper = require("./typings/reaper");
+// import reaper = require("./typings/reaper");
 import utils = require("./typings/utils")
 // import seance = require("./typings/seance");
 // import timelock = require("./typings/timelock");
@@ -20,5 +20,5 @@ declare namespace SoulData {
         target: Function;
     }, targetArguments?: any): Promise<any>;
 
-    export { soul, blocks, charts, exchanges, summoner, reapers, utils }; // TODO: seance
+    export { soul, blocks, charts, exchange, summoner, utils }; // TODO: seance
 }
